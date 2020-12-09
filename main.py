@@ -9,7 +9,6 @@ from auth.schemas import AuthUsersBase
 from config import ACCESS_TOKEN_EXPIRE_MINUTES
 from database import engine, SessionLocal
 from dogs import models, schemas, crud
-from worker.celery_app import celery_app
 from users import models as model_users, schemas as schemas_users, crud as crud_users
 from auth import models as model_auth_users
 import requests
@@ -18,7 +17,9 @@ import requests
      ********  creating models  ***********
 """
 
+model_users.Base.metadata.create_all(bind=engine)
 models.Base.metadata.create_all(bind=engine)
+model_auth_users.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
