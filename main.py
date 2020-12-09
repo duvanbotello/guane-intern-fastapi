@@ -106,3 +106,45 @@ def delete_dogs(name: str, db: Session = Depends(get_db),
         raise HTTPException(status_code=404, detail="Dog not found")
 
 
+"""
+     ********  endpoints for the user entity  ***********
+"""
+
+
+@app.get("/api/users", response_model=List[schemas_users.Users])
+def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    users = crud_users.get_users(db, skip=skip, limit=limit)
+    if not users:
+        raise HTTPException(status_code=200, detail="No users registered")
+    return users
+
+
+@app.post("/api/users/{id_user}", response_model=schemas_users.Users)
+def create_user(id_user: int, user: schemas_users.UsersCreate, db: Session = Depends(get_db),
+                current_user: AuthUsersBase = Depends(get_current_active_user)):
+    db_user = crud_users.get_user(db, id_user=id_user)
+    if db_user:
+        raise HTTPException(status_code=400, detail="User already registered")
+    if crud_users.create_user(db=db, user=user):
+        raise HTTPException(status_code=200, detail="User entered successfully.")
+
+
+@app.put("/api/users/{id_user}", response_model=schemas_users.Users)
+def edit_user(id_user: int, user: schemas_users.UsersCreate, db: Session = Depends(get_db),
+              current_user: AuthUsersBase = Depends(get_current_active_user)):
+    db_user = crud_users.update_user(db, id_user=id_user, user_update=user)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
+
+
+@app.delete("/api/users/{id_user}")
+def delete_user(id_user: int, db: Session = Depends(get_db),
+                current_user: AuthUsersBase = Depends(get_current_active_user)):
+    db_user = crud_users.get_user(db, id_user=id_user)
+    if db_user:
+        user_delete = crud_users.delete_user(db, id_user=id_user)
+        if user_delete:
+            raise HTTPException(status_code=200, detail="User successfully remove.")
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
