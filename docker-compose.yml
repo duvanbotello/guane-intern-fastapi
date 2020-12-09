@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  postgres_db_api:
+    image: postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    container_name: postgres_db_api
+    networks:
+      some_network:
+        aliases:
+          - database
+          - localhost
+  web_fas_api:
+    build: .
+    command: uvicorn main:app --reload --port 8080 --host 0.0.0.0
+    volumes:
+      - .:/code
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres_db_api
+    links:
+      - postgres_db_api:postgres_db_api
+    container_name: web_fas_api
+    networks:
+      - some_network
+networks:
+  some_network:
