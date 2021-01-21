@@ -11,6 +11,7 @@ from database import engine, SessionLocal
 from dogs import models, schemas, crud
 from users import models as model_users, schemas as schemas_users, crud as crud_users
 from auth import models as model_auth_users
+from mangum import Mangum
 import requests
 
 """
@@ -167,3 +168,6 @@ def delete_user(id_user: int, db: Session = Depends(get_db),
             raise HTTPException(status_code=200, detail="User successfully remove.")
     else:
         raise HTTPException(status_code=404, detail="User not found")
+
+
+handler = Mangum(app, enable_lifespan=False)
